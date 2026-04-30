@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jalapeño — Prompt Library</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf9f6;--bg2:#f1efe9;--bg3:#e8e5dc;
+  --surface:#fff;--surface-hover:#fefdfb;
+  --text:#1a1a18;--text2:#4a4940;--text3:#7a7968;
+  --accent:#c8102e;--accent2:#86a30f;--accent3:#e87d1e;
+  --border:#e0ddd4;--border2:#ccc8bc;
+  --code-bg:#2d2b28;--code-text:#f0ece4;
+  --tag-bg:#f5f3ed;--tag-text:#5a5848;
+  --shadow:0 1px 3px rgba(26,26,24,.06),0 6px 16px rgba(26,26,24,.04);
+  --shadow-lg:0 4px 12px rgba(26,26,24,.08),0 16px 40px rgba(26,26,24,.06);
+  --radius:10px;--radius-sm:6px;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --transition:0.2s cubic-bezier(.4,0,.2,1);
+  --spice-mild:#86a30f;--spice-medium:#e87d1e;--spice-hot:#c8102e;--spice-habanero:#8b0000;
+  --nav-width:260px;
+}
+[data-theme="dark"]{
+  --bg:#141310;--bg2:#1c1b17;--bg3:#252320;
+  --surface:#1e1d19;--surface-hover:#26241f;
+  --text:#e8e5dc;--text2:#b0ad9f;--text3:#7a7968;
+  --accent:#e8453a;--accent2:#a4c639;--accent3:#f0a040;
+  --border:#2e2c27;--border2:#3a3833;
+  --code-bg:#0f0e0c;--code-text:#d4d0c6;
+  --tag-bg:#252320;--tag-text:#b0ad9f;
+  --shadow:0 1px 3px rgba(0,0,0,.2),0 6px 16px rgba(0,0,0,.15);
+  --shadow-lg:0 4px 12px rgba(0,0,0,.3),0 16px 40px rgba(0,0,0,.2);
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh;display:flex;transition:background var(--transition),color var(--transition)}
+
+/* SIDEBAR NAV */
+.sidebar{position:fixed;top:0;left:0;width:var(--nav-width);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s ease}
+.sidebar-brand{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-brand h1{font-family:var(--font-display);font-size:1.55rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:8px;letter-spacing:-.02em}
+.sidebar-brand h1 span{font-size:1.3rem}
+.sidebar-brand .author{font-size:.7rem;color:var(--text3);margin-top:4px;letter-spacing:.03em;text-transform:uppercase;font-weight:500}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.sidebar-nav::-webkit-scrollbar{width:4px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:.82rem;color:var(--text2);cursor:pointer;transition:all var(--transition);border-left:3px solid transparent;font-weight:400;text-decoration:none}
+.nav-item:hover{background:var(--bg2);color:var(--text)}
+.nav-item.active{background:var(--bg2);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.nav-item .nav-num{font-family:var(--font-mono);font-size:.7rem;color:var(--text3);min-width:20px}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.sidebar-footer .footer-row{display:flex;align-items:center;justify-content:space-between}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;cursor:pointer;font-size:.78rem;color:var(--text2);font-family:var(--font-body);display:flex;align-items:center;gap:6px;transition:all var(--transition)}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.kbd-hint{font-size:.65rem;color:var(--text3);font-family:var(--font-mono)}
+
+/* MAIN */
+.main{margin-left:var(--nav-width);flex:1;min-height:100vh}
+.top-bar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:16px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);background:rgba(250,249,246,.85)}
+[data-theme="dark"] .top-bar{background:rgba(20,19,16,.85)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger svg{width:22px;height:22px;stroke:var(--text);stroke-width:2}
+.search-box{flex:1;position:relative;max-width:520px}
+.search-box input{width:100%;padding:10px 16px 10px 40px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--font-body);font-size:.88rem;transition:all var(--transition);outline:none}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,16,46,.08)}
+.search-box input::placeholder{color:var(--text3)}
+.search-box .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.search-box .search-icon svg{width:16px;height:16px}
+.search-box .search-kbd{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:.65rem;color:var(--text3);background:var(--bg2);padding:2px 6px;border-radius:3px;border:1px solid var(--border);pointer-events:none}
+.top-actions{display:flex;align-items:center;gap:8px}
+.filter-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);font-family:var(--font-body);font-size:.78rem;cursor:pointer;transition:all var(--transition);display:flex;align-items:center;gap:5px;font-weight:500;white-space:nowrap}
+.filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+.filter-btn.active{background:rgba(200,16,46,.06)}
+.stats-badge{font-size:.72rem;color:var(--text3);font-family:var(--font-mono);white-space:nowrap}
+
+/* CONTENT AREA */
+.content{padding:28px 32px 80px;max-width:960px;margin:0 auto}
+.content-header{margin-bottom:28px}
+.content-header h2{font-family:var(--font-display);font-size:1.8rem;font-weight:800;letter-spacing:-.02em;color:var(--text)}
+.content-header p{color:var(--text2);margin-top:6px;font-size:.92rem;max-width:640px}
+
+/* CATEGORY FILTERS */
+.category-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.cat-pill{padding:5px 13px;border-radius:20px;font-size:.75rem;font-weight:500;cursor:pointer;transition:all var(--transition);border:1px solid var(--border);background:var(--surface);color:var(--text2)}
+.cat-pill:hover{border-color:var(--accent);color:var(--accent)}
+.cat-pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* PROMPT CARDS */
+.cards-grid{display:flex;flex-direction:column;gap:16px}
+.prompt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all var(--transition);animation:fadeUp .4s ease both}
+.prompt-card:hover{box-shadow:var(--shadow);border-color:var(--border2)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card-header{padding:18px 22px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;user-select:none}
+.card-header:hover .card-title{color:var(--accent)}
+.card-num{font-family:var(--font-mono);font-size:.7rem;color:var(--text3);min-width:22px;padding-top:4px}
+.card-info{flex:1}
+.card-title{font-family:var(--font-display);font-size:1.12rem;font-weight:700;transition:color var(--transition);letter-spacing:-.01em}
+.card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:7px}
+.spice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.02em;text-transform:uppercase}
+.spice-mild{background:#f0f5e0;color:var(--spice-mild)}
+[data-theme="dark"] .spice-mild{background:#1a2008;color:#b8d44a}
+.spice-medium{background:#fef0e0;color:var(--spice-medium)}
+[data-theme="dark"] .spice-medium{background:#2a1a08;color:#f0a040}
+.spice-hot{background:#fce8ea;color:var(--spice-hot)}
+[data-theme="dark"] .spice-hot{background:#2a0810;color:#e8453a}
+.spice-habanero{background:#f5e0e0;color:var(--spice-habanero)}
+[data-theme="dark"] .spice-habanero{background:#200808;color:#d44040}
+.cat-tag{font-size:.68rem;color:var(--tag-text);background:var(--tag-bg);padding:2px 8px;border-radius:10px;font-weight:500}
+.card-actions{display:flex;align-items:center;gap:4px;padding-top:2px}
+.card-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:var(--radius-sm);color:var(--text3);transition:all var(--transition);display:flex;align-items:center}
+.card-btn:hover{background:var(--bg2);color:var(--accent)}
+.card-btn.fav-active{color:var(--accent3)}
+.card-btn svg{width:16px;height:16px}
+.expand-icon{transition:transform .2s ease;color:var(--text3)}
+.prompt-card.expanded .expand-icon{transform:rotate(180deg)}
+.card-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.prompt-card.expanded .card-body{max-height:8000px}
+.card-content{padding:0 22px 20px;padding-left:56px}
+.card-content p{color:var(--text2);margin-bottom:12px;font-size:.88rem}
+.card-content strong{color:var(--text);font-weight:600}
+.card-content em{font-style:italic;color:var(--text2)}
+.card-content ul,.card-content ol{margin:8px 0 12px 18px;color:var(--text2);font-size:.88rem}
+.card-content li{margin-bottom:4px}
+
+/* CODE BLOCKS */
+.code-block{position:relative;margin:12px 0;border-radius:var(--radius-sm);overflow:hidden}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--code-bg);border-bottom:1px solid rgba(255,255,255,.06)}
+.code-label{font-family:var(--font-mono);font-size:.65rem;color:rgba(240,236,228,.4);text-transform:uppercase;letter-spacing:.05em}
+.copy-btn{display:flex;align-items:center;gap:5px;background:none;border:1px solid rgba(255,255,255,.1);padding:4px 10px;border-radius:4px;color:rgba(240,236,228,.6);font-family:var(--font-mono);font-size:.68rem;cursor:pointer;transition:all var(--transition)}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn.copied{border-color:var(--accent2);color:var(--accent2)}
+.copy-btn svg{width:13px;height:13px}
+pre{background:var(--code-bg);padding:16px;overflow-x:auto;font-family:var(--font-mono);font-size:.8rem;line-height:1.6;color:var(--code-text);margin:0}
+
+/* TABLES in card */
+.card-content table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82rem}
+.card-content th{background:var(--bg2);text-align:left;padding:8px 12px;font-weight:600;border:1px solid var(--border);color:var(--text);font-size:.76rem;text-transform:uppercase;letter-spacing:.03em}
+.card-content td{padding:8px 12px;border:1px solid var(--border);color:var(--text2);vertical-align:top}
+.card-content tr:hover td{background:var(--bg2)}
+.table-scroll{overflow-x:auto;margin:12px 0;border-radius:var(--radius-sm)}
+
+/* SUB-SECTIONS inside a card */
+.sub-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.sub-section h4{font-family:var(--font-body);font-weight:600;font-size:.9rem;margin-bottom:8px;color:var(--text)}
+
+/* PROMPT BUILDER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-family:var(--font-display);font-size:1.2rem;font-weight:700}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;transition:color var(--transition)}
+.modal-close:hover{color:var(--accent)}
+.modal-close svg{width:20px;height:20px}
+.modal-body{padding:24px}
+.builder-step{margin-bottom:20px}
+.builder-step label{display:block;font-weight:600;font-size:.85rem;margin-bottom:6px;color:var(--text)}
+.builder-step .step-hint{font-size:.76rem;color:var(--text3);margin-bottom:8px}
+.builder-step select,.builder-step input,.builder-step textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:.88rem;transition:border var(--transition);outline:none}
+.builder-step select:focus,.builder-step input:focus,.builder-step textarea:focus{border-color:var(--accent)}
+.builder-step textarea{resize:vertical;min-height:70px}
+.builder-output{background:var(--code-bg);color:var(--code-text);font-family:var(--font-mono);font-size:.82rem;line-height:1.6;padding:16px;border-radius:var(--radius-sm);margin-top:16px;white-space:pre-wrap;min-height:60px;position:relative}
+.builder-actions{display:flex;gap:8px;margin-top:16px}
+.btn-primary{padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;transition:all var(--transition);display:flex;align-items:center;gap:6px}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-secondary{padding:10px 20px;background:var(--surface);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-weight:500;font-size:.85rem;cursor:pointer;transition:all var(--transition)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--code-bg);color:var(--code-text);padding:12px 20px;border-radius:var(--radius-sm);font-size:.85rem;z-index:300;transform:translateY(80px);opacity:0;transition:all .3s ease;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast svg{width:16px;height:16px;color:var(--accent2);flex-shrink:0}
+
+/* NO RESULTS */
+.no-results{text-align:center;padding:60px 20px;color:var(--text3)}
+.no-results .nr-icon{font-size:2.5rem;margin-bottom:12px}
+.no-results p{font-size:.92rem}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
+  .main{margin-left:0}
+  .hamburger{display:block}
+  .content{padding:20px 16px 60px}
+  .top-bar{padding:12px 16px}
+  .card-content{padding-left:22px}
+  .search-box .search-kbd{display:none}
+  .stats-badge{display:none}
+  .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none}
+  .sidebar-overlay.visible{display:block}
+}
+@media(max-width:500px){
+  .top-actions{gap:4px}
+  .filter-btn span{display:none}
+}
+
+/* PRINT */
+@media print{
+  .sidebar,.top-bar,.card-actions,.copy-btn,.code-header{display:none!important}
+  .main{margin-left:0!important}
+  .prompt-card{break-inside:avoid;border:1px solid #ccc}
+  .card-body{max-height:none!important}
+}
+
+/* Scrollbar */
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* FAB - Add Prompt */
+.fab{position:fixed;bottom:28px;right:28px;z-index:90;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;transition:all var(--transition);font-size:1.5rem}
+.fab:hover{transform:scale(1.08);filter:brightness(1.12)}
+.fab svg{width:24px;height:24px;stroke:#fff;stroke-width:2.5}
+
+/* Add/Edit Modal extensions */
+.modal-wide{max-width:700px}
+.form-row{display:flex;gap:14px}
+.form-row>.builder-step{flex:1}
+.prompt-blocks-area{margin-top:8px}
+.prompt-block-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;position:relative;animation:fadeUp .2s ease}
+.prompt-block-item .remove-block{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;border-radius:3px;transition:all var(--transition)}
+.prompt-block-item .remove-block:hover{color:var(--accent);background:rgba(200,16,46,.08)}
+.prompt-block-item .remove-block svg{width:14px;height:14px}
+.prompt-block-item label{font-size:.78rem;font-weight:500;color:var(--text2);margin-bottom:4px;display:block}
+.prompt-block-item input,.prompt-block-item textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-family:var(--font-body);font-size:.85rem;outline:none;transition:border var(--transition)}
+.prompt-block-item input:focus,.prompt-block-item textarea:focus{border-color:var(--accent)}
+.prompt-block-item textarea{font-family:var(--font-mono);font-size:.8rem;min-height:90px;resize:vertical;line-height:1.5}
+.add-block-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border:1px dashed var(--border2);border-radius:var(--radius-sm);background:none;color:var(--text3);font-family:var(--font-body);font-size:.8rem;cursor:pointer;transition:all var(--transition);margin-top:4px}
+.add-block-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(200,16,46,.03)}
+.add-block-btn svg{width:14px;height:14px}
+
+/* User prompt badge */
+.user-badge{font-size:.62rem;background:var(--accent2);color:#fff;padding:1px 6px;border-radius:8px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+[data-theme="dark"] .user-badge{background:var(--accent2);color:#111}
+
+/* Card edit/delete actions */
+.card-btn.edit-btn:hover{color:var(--accent2)}
+.card-btn.delete-btn:hover{color:var(--accent)}
+
+/* Import/Export bar */
+.io-bar{display:flex;gap:8px;align-items:center;margin-top:6px}
+.io-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.72rem;color:var(--text3);font-family:var(--font-body);display:flex;align-items:center;gap:4px;transition:all var(--transition)}
+.io-btn:hover{border-color:var(--accent);color:var(--accent)}
+.io-btn svg{width:12px;height:12px}
+#importFile{display:none}
+
+/* Confirm dialog */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.confirm-overlay.visible{display:flex}
+.confirm-box{background:var(--surface);border-radius:var(--radius);padding:28px;max-width:400px;width:100%;box-shadow:var(--shadow-lg);animation:modalIn .2s ease;text-align:center}
+.confirm-box h4{font-family:var(--font-display);font-size:1.1rem;margin-bottom:10px}
+.confirm-box p{font-size:.88rem;color:var(--text2);margin-bottom:20px}
+.confirm-actions{display:flex;gap:10px;justify-content:center}
+</style>
+</head>
+<body>
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <h1><span>🌶️</span> Jalapeño</h1>
+    <div class="author">Jorge Gonzalez · GenAI Delivery Transformation</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebarNav"></nav>
+  <div class="sidebar-footer">
+    <div class="footer-row">
+      <button class="theme-toggle" onclick="openAddPrompt()" title="Add new prompt (N)" style="background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600">
+        ＋ New Prompt
+      </button>
+      <span class="kbd-hint">Press N</span>
+    </div>
+    <div class="footer-row">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme (T)">
+        <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
+      </button>
+      <span class="kbd-hint">Press T</span>
+    </div>
+    <div class="footer-row">
+      <button class="theme-toggle" onclick="openBuilder()" title="Prompt Builder (B)">
+        🔨 Builder
+      </button>
+      <span class="kbd-hint">Press B</span>
+    </div>
+    <div class="io-bar">
+      <button class="io-btn" onclick="exportPrompts()" title="Export custom prompts as JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="io-btn" onclick="document.getElementById('importFile').click()" title="Import prompts from JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </button>
+      <input type="file" id="importFile" accept=".json" onchange="importPrompts(event)">
+    </div>
+    <div class="footer-row" style="justify-content:center;padding-top:4px">
+      <span class="kbd-hint">/ = Search · Esc = Close</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="search-box">
+      <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+      <input type="text" id="searchInput" placeholder="Search prompts, frameworks, techniques..." autocomplete="off">
+      <span class="search-kbd">/</span>
+    </div>
+    <div class="top-actions">
+      <button class="filter-btn" id="favFilter" onclick="toggleFavFilter()" title="Show favorites">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Favorites</span>
+      </button>
+      <button class="filter-btn" onclick="expandAll()" title="Expand/Collapse all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+        <span>Expand All</span>
+      </button>
+      <span class="stats-badge" id="statsCount"></span>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="content-header">
+      <h2>Prompt Library</h2>
+      <p>Enterprise-ready prompt frameworks, power words, and techniques to unlock better thinking from any LLM.</p>
+    </div>
+
+    <!-- CATEGORY PILLS -->
+    <div class="category-bar" id="categoryBar"></div>
+
+    <!-- CARDS -->
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <!-- NO RESULTS -->
+    <div class="no-results" id="noResults" style="display:none">
+      <div class="nr-icon">🌶️</div>
+      <p>No prompts match your search. Try different keywords.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PROMPT BUILDER MODAL -->
+<div class="modal-overlay" id="builderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🔨 RACE Prompt Builder</h3>
+      <button class="modal-close" onclick="closeBuilder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--text2);margin-bottom:18px">Build a structured prompt using the RACE framework. Fill in each field and the prompt is assembled for you.</p>
+      <div class="builder-step">
+        <label>🎭 Role</label>
+        <div class="step-hint">Who should the model act as?</div>
+        <input type="text" id="bRole" placeholder="e.g. Senior PMO Analyst, Data Scientist, UX Researcher">
+      </div>
+      <div class="builder-step">
+        <label>⚡ Action</label>
+        <div class="step-hint">What exactly should it do?</div>
+        <textarea id="bAction" placeholder="e.g. Develop a risk assessment matrix for the cloud migration project"></textarea>
+      </div>
+      <div class="builder-step">
+        <label>📋 Context</label>
+        <div class="step-hint">What situation, constraints, or background matters?</div>
+        <textarea id="bContext" placeholder="e.g. For a federal agency migrating from on-prem to AWS GovCloud, with ATO requirements"></textarea>
+      </div>
+      <div class="builder-step">
+        <label>🎯 Expectation</label>
+        <div class="step-hint">What does "good" look like?</div>
+        <textarea id="bExpect" placeholder="e.g. Output includes risk categories, severity ratings (H/M/L), owners, and mitigation plans in table format"></textarea>
+      </div>
+      <div class="builder-step">
+        <label>🛡️ Add-ons <span style="font-weight:400;color:var(--text3)">(optional guardrails)</span></label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" class="addon-chk" value="Read the beginning, middle, and end of the attached document before answering."> Force full document coverage
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" class="addon-chk" value="Only use the information provided in the attached document. Do not rely on external or pre-existing knowledge."> Lock knowledge source
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" class="addon-chk" value='If you do not know the answer, state "I don&#39;t know" or "This information is not available in the provided context."'> Permit "I don't know"
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" class="addon-chk" value="Answer only based on what is explicitly asked. Do not add unrelated information or make assumptions beyond the scope."> Enforce scope discipline
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" class="addon-chk" value="Ensure your response is logically consistent. If you detect contradictions, flag them and provide clarification."> Logical consistency checks
+          </label>
+        </div>
+      </div>
+      <div class="builder-output" id="builderOutput">Your assembled prompt will appear here...</div>
+      <div class="builder-actions">
+        <button class="btn-primary" onclick="copyBuilderOutput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Prompt
+        </button>
+        <button class="btn-secondary" onclick="clearBuilder()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Copied to clipboard!</span>
+</div>
+
+<!-- FAB - Add Prompt -->
+<button class="fab" onclick="openAddPrompt()" title="Add new prompt (N)">
+  <svg viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- ADD / EDIT PROMPT MODAL -->
+<div class="modal-overlay" id="addPromptModal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3 id="addModalTitle">🌶️ Add New Prompt</h3>
+      <button class="modal-close" onclick="closeAddPrompt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="builder-step">
+        <label>📌 Prompt Title</label>
+        <input type="text" id="apTitle" placeholder='e.g. "Chain-of-Thought Reasoning"'>
+      </div>
+
+      <div class="form-row">
+        <div class="builder-step">
+          <label>🏷️ Category</label>
+          <div class="step-hint">Pick existing or type a new one</div>
+          <input type="text" id="apCategory" list="catSuggestions" placeholder="e.g. Framework, Technique, Template">
+          <datalist id="catSuggestions"></datalist>
+        </div>
+        <div class="builder-step">
+          <label>🌶️ Spice Level</label>
+          <div class="step-hint">Complexity / sophistication</div>
+          <select id="apSpice">
+            <option value="mild">🌶️ Mild — Simple, quick wins</option>
+            <option value="medium">🌶️🌶️ Medium — Moderate technique</option>
+            <option value="hot">🌶️🌶️🌶️ Hot — Advanced strategy</option>
+            <option value="habanero">🌶️🌶️🌶️🌶️ Habanero — Expert-level</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="builder-step">
+        <label>📝 Description</label>
+        <div class="step-hint">A brief summary shown on the card (1–2 sentences)</div>
+        <textarea id="apDesc" placeholder="What does this prompt do and when should someone use it?" style="min-height:55px"></textarea>
+      </div>
+
+      <div class="builder-step">
+        <label>✍️ Explanation / Notes</label>
+        <div class="step-hint">Additional context, tips, or explanation (shown above the prompt blocks). Supports basic text.</div>
+        <textarea id="apNotes" placeholder='e.g. "This technique works best when you already have a first draft..."' style="min-height:55px"></textarea>
+      </div>
+
+      <div class="builder-step">
+        <label>💻 Prompt Blocks</label>
+        <div class="step-hint">Add one or more copy-pasteable prompt templates. Each gets its own code block with a copy button.</div>
+        <div class="prompt-blocks-area" id="promptBlocksArea">
+          <!-- blocks injected here -->
+        </div>
+        <button class="add-block-btn" onclick="addPromptBlock()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add another prompt block
+        </button>
+      </div>
+
+      <div class="builder-actions">
+        <button class="btn-primary" id="apSaveBtn" onclick="savePrompt()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Prompt
+        </button>
+        <button class="btn-secondary" onclick="closeAddPrompt()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h4 id="confirmTitle">Delete prompt?</h4>
+    <p id="confirmMsg">This will permanently remove this custom prompt.</p>
+    <div class="confirm-actions">
+      <button class="btn-primary" id="confirmYes" style="background:var(--accent)">Delete</button>
+      <button class="btn-secondary" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== PROMPT DATA ==========
+const prompts = [
+  {
+    id: 1, num: "01", title: "Prompt Frameworks — RACE, COSTAR, CRISPE, CLEAR, CETO",
+    spice: "mild", category: "Framework",
+    desc: "Five structured frameworks that force better thinking before prompting. RACE is the problem-solving powerhouse; COSTAR handles communication; CRISPE delivers precision; CLEAR supports iteration; CETO enables expert execution.",
+    content: `<p>Great prompts don't start with better wording — they start with <strong>better thinking</strong>. Frameworks force you to slow down, cover the essentials, and make intent explicit <em>before</em> the model responds.</p>
+
+<div class="sub-section">
+<h4>🏁 RACE — The Problem-Solving Powerhouse</h4>
+<div class="table-scroll"><table>
+<tr><th>Letter</th><th>Stands For</th><th>Ask Yourself</th></tr>
+<tr><td><strong>R</strong></td><td>Role</td><td>Who is the model acting as?</td></tr>
+<tr><td><strong>A</strong></td><td>Action</td><td>What exactly should it do?</td></tr>
+<tr><td><strong>C</strong></td><td>Context</td><td>What situation, constraints, or background matters?</td></tr>
+<tr><td><strong>E</strong></td><td>Expectation</td><td>What does "good" look like?</td></tr>
+</table></div>
+</div>
+
+${codeBlock("RACE Example Prompt", `# Role
+As a PMO analyst
+
+# Action
+Develop a project dashboard
+
+# Context
+For a software implementation project
+
+# Expectation
+The dashboard tracks KPIs, milestones, risks, and dependencies`)}
+
+<p><strong>Why RACE works:</strong> It structures the prompt <em>and</em> your thinking. Before the model answers, you've verified: the role, the task, the context, and the definition of success.</p>
+
+<div class="sub-section">
+<h4>⭐ COSTAR — Communication-Heavy Work</h4>
+<p><strong>(Context · Objective · Style · Tone · Audience · Response)</strong><br>Best for exec updates, emails, decks, and narratives. Use when <strong>alignment matters as much as accuracy</strong>.</p>
+</div>
+
+<div class="sub-section">
+<h4>⭐ CRISPE — Highly Tailored Outputs</h4>
+<p><strong>(Context · Role · Instruction · Specification · Purpose · Example)</strong><br>Combines role clarity with detailed instructions and anchoring examples. Use when <strong>"almost right" isn't good enough</strong>.</p>
+</div>
+
+<div class="sub-section">
+<h4>⭐ CLEAR — Iterative Thinking & Refinement</h4>
+<p><strong>(Concise · Logical · Explicit · Adaptive · Reflective)</strong><br>Encourages clarity and logical flow; adapts as feedback is introduced. Use when <strong>the prompt will evolve over time</strong>.</p>
+</div>
+
+<div class="sub-section">
+<h4>⭐ CETO — Expert-Level Execution</h4>
+<p><strong>(Context · Expert Persona · Task · Output)</strong><br>Keeps the task tight and focused. Use when <strong>you want precision without verbosity</strong>.</p>
+</div>
+
+<div class="sub-section">
+<h4>Quick Framework Picker</h4>
+<div class="table-scroll"><table>
+<tr><th>Your Need</th><th>Use This</th></tr>
+<tr><td>Problem-solving, delivery work</td><td><strong>RACE</strong></td></tr>
+<tr><td>Audience-tailored communication</td><td><strong>COSTAR</strong></td></tr>
+<tr><td>High-precision repeatable tasks</td><td><strong>CRISPE</strong></td></tr>
+<tr><td>Evolving drafts and analysis</td><td><strong>CLEAR</strong></td></tr>
+<tr><td>Expert output, minimal noise</td><td><strong>CETO</strong></td></tr>
+</table></div>
+</div>`
+  },
+  {
+    id: 2, num: "02", title: "Power Word — \"Dichotomy\"",
+    spice: "mild", category: "Power Word",
+    desc: "A single SAT-level word that changes the entire shape of an LLM's output — turning flat summaries into analytical, contrast-driven insights.",
+    content: `<p>SAT-level words act like intellectual condiments — one well-chosen word can change the entire output's shape.</p>
+
+<p><strong>Baseline prompt:</strong></p>
+${codeBlock("Without power word", `Summarize the meeting notes. [Copy meeting notes here]`)}
+<p><em>Result: A linear recap, blended together, low contrast.</em></p>
+
+<p><strong>Upgraded prompt 🔥:</strong></p>
+${codeBlock("With power word", `Summarize the meeting notes, highlighting the key dichotomy between opposing viewpoints and tradeoffs discussed.
+[Copy meeting notes here]`)}
+
+<p><strong>What changes immediately:</strong> The model organizes around contrast. Tradeoffs, tensions, and decisions surface naturally. The summary becomes analytical, not just descriptive.</p>
+
+<p><strong>Why it works:</strong> "Dichotomy" implicitly tells the model to look for two contrasting forces, separate signal from noise, and frame insights in terms of decisions, tensions, and choices.</p>
+
+<p><em>Tip: Use dichotomy like a jalapeño — sparingly, intentionally, and only when you want more bite.</em></p>`
+  },
+  {
+    id: 3, num: "03", title: "Synthesizing Documents",
+    spice: "mild", category: "Technique",
+    desc: "Replace 'summarize' with 'synthesize' and add structure — the output shifts from extractive recap to analytical synthesis with preserved relationships.",
+    content: `<p><strong>Basic version</strong> (inconsistent results):</p>
+${codeBlock("Basic", `Synthesize this [meeting/document/data]`)}
+
+<p><strong>Power version</strong> (reliable, reusable):</p>
+${codeBlock("Structured synthesis", `Synthesize this [meeting/document/data] into:
+1. Core decisions made (with reasoning)
+2. Conflicting viewpoints (and how resolved)
+3. Action items (owner + deadline)
+4. Open questions requiring follow-up
+5. Emerging patterns worth tracking`)}
+
+<p><strong>Key distinction:</strong> "Summarize" is extractive (pulls key sentences). "Synthesize" is analytical (connects ideas across time and topics). Adding structure prevents creative wandering.</p>
+<p><strong>Best for:</strong> Meeting notes, research analysis, multi-source intel, recurring reports where consistency matters.</p>
+<p><strong>Pro tip:</strong> For one-off exploration where you want unexpected insights, skip the structure. For operational/recurring work, structure is 80% of the value.</p>`
+  },
+  {
+    id: 4, num: "04", title: "Red Team Your Own Work",
+    spice: "hot", category: "Technique",
+    desc: "AI-powered pre-mortem + red teaming in one move. Flip the role and have the LLM find exactly why your work will fail — with evidence and fast tests.",
+    content: `<p>Flip the role — have the LLM act as a <strong>harsh but fair red team</strong> that finds why your idea, plan, or output will fail. Run this <strong>after</strong> you've generated a draft, strategy, or recommendation.</p>
+
+${codeBlock("Red Team prompt (copy/paste)", `Act as a harsh-but-fair reviewer of the provided [artifact]
+(proposal/plan/prompt/design).
+
+Goal: identify why it will fail or is incomplete/mediocre.
+Produce exactly 12 distinct, non-overlapping reasons, prioritized
+by impact.
+
+For each:
+(1) Claim (1 sentence)
+(2) Quote/point to specific evidence from the artifact
+    (or label as an assumption)
+(3) What evidence would confirm/falsify
+(4) A small fast test (≤30 minutes) to expose it
+(5) Severity (H/M/L)
+
+Be blunt and concrete; no generic advice, no praise, no ad hominem.
+If the artifact or context is missing, ask 3 clarifying questions,
+then proceed with explicit assumptions.`)}
+
+<p>This is essentially <strong>AI-powered pre-mortem + red teaming</strong> in one move.</p>`
+  },
+  {
+    id: 5, num: "05", title: "Reverse Prompting",
+    spice: "medium", category: "Technique",
+    desc: "Start with the output and work backward to discover the prompt that would generate it — learning the mechanics behind great prompts.",
+    content: `<p>Start with the <em>output</em> and work backward to discover the <em>prompt</em> that would generate it.</p>
+
+${codeBlock("Reverse prompting syntax", `Reverse prompt this: [paste content].
+What prompt would generate output like this?`)}
+
+<p><strong>Why it works:</strong> Forces the model to infer intent, constraints, and implicit structure — surfacing the hidden instructions behind strong outputs. You're not just copying prompts, you're learning the mechanics behind them.</p>`
+  },
+  {
+    id: 6, num: "06", title: "Anti-Hallucination Add-Ons (5 Guardrails)",
+    spice: "hot", category: "Guardrail",
+    desc: "Five copy/paste statements that dramatically reduce hallucinations by closing the most common gaps in prompt instructions.",
+    content: `<p>Most hallucinations come from <strong>underspecified instructions</strong>, not bad models. Append these guardrails to any prompt.</p>
+
+<div class="sub-section">
+<h4>1️⃣ Force Full Document Coverage</h4>
+${codeBlock("Add-on #1", `Read the beginning, middle, and end of the attached document before answering.`)}
+<p><em>Prevents cherry-picking and early stopping.</em></p>
+</div>
+
+<div class="sub-section">
+<h4>2️⃣ Lock the Knowledge Source</h4>
+${codeBlock("Add-on #2", `Only use the information provided in the attached document to generate your response. Do not rely on external or pre-existing knowledge.`)}
+<p><em>Eliminates "helpful" but ungrounded completions.</em></p>
+</div>
+
+<div class="sub-section">
+<h4>3️⃣ Permit "I Don't Know"</h4>
+${codeBlock("Add-on #3", `If you do not know the answer or cannot verify the information, state "I don't know" or "This information is not available in the provided context."`)}
+<p><em>Removes pressure to fabricate. One of the most powerful hallucination killers.</em></p>
+</div>
+
+<div class="sub-section">
+<h4>4️⃣ Enforce Scope Discipline</h4>
+${codeBlock("Add-on #4", `Answer only based on what is explicitly asked. Do not add unrelated information or make assumptions beyond the scope of the question.`)}
+<p><em>Prevents scope creep and speculative expansion.</em></p>
+</div>
+
+<div class="sub-section">
+<h4>5️⃣ Require Logical Consistency Checks</h4>
+${codeBlock("Add-on #5", `Ensure your response is logically consistent. If you detect contradictions, flag them and provide clarification.`)}
+<p><em>Turns the model into its own reviewer.</em></p>
+</div>
+
+<div class="sub-section">
+<h4>How to Use</h4>
+<ul>
+<li>Add them <strong>at the end</strong> of your prompt as a "control block."</li>
+<li>Use <strong>all five</strong> for high-stakes work (policy, legal, compliance, RFPs).</li>
+<li>Use <strong>2–3</strong> for everyday analysis and summaries.</li>
+</ul>
+</div>`
+  },
+  {
+    id: 7, num: "07", title: "Active-Verb Matrix — Replace \"Analyze\"",
+    spice: "medium", category: "Technique",
+    desc: "\"Analyze\" is a catch-all bucket. This matrix maps seven precision verbs to specific reasoning modes, outputs, and elite add-ons.",
+    content: `<p>"Analyze" tells the model to <em>do something</em> but not <strong>how to think</strong>. Pick a sharper verb to lock the model into the right reasoning mode.</p>
+
+<div class="sub-section">
+<h4>Quick Verb Picker</h4>
+<div class="table-scroll"><table>
+<tr><th>You Need…</th><th>Use This Verb</th></tr>
+<tr><td>A <strong>decision</strong></td><td><strong>Evaluate</strong></td></tr>
+<tr><td><strong>Compliance / completeness</strong></td><td><strong>Audit</strong></td></tr>
+<tr><td><strong>Discovery / pattern finding</strong></td><td><strong>Examine</strong></td></tr>
+<tr><td><strong>Risk / readiness / impact</strong></td><td><strong>Assess</strong></td></tr>
+<tr><td><strong>Root cause</strong></td><td><strong>Diagnose</strong></td></tr>
+<tr><td><strong>Fast improvement</strong></td><td><strong>Review</strong></td></tr>
+<tr><td><strong>Meaning + implications</strong></td><td><strong>Interpret</strong></td></tr>
+</table></div>
+</div>
+
+<div class="sub-section">
+<h4>Full Verb Matrix</h4>
+<div class="table-scroll"><table>
+<tr><th>Verb</th><th>Reasoning Mode</th><th>Best Use Cases</th><th>Top 1% Add-On</th></tr>
+<tr><td><strong>Evaluate</strong></td><td>Judge against criteria; weigh trade-offs</td><td>Vendor selection, A vs B, proposal scoring</td><td>"Use this rubric + weights + thresholds; cite evidence; include confidence."</td></tr>
+<tr><td><strong>Audit</strong></td><td>Verify compliance; check completeness</td><td>Policy checks, deliverable QA, requirements traceability</td><td>"Audit against [standard]; output: finding, evidence, severity (H/M/L), remediation, owner."</td></tr>
+<tr><td><strong>Examine</strong></td><td>Explore; surface patterns</td><td>Early discovery, messy notes, raw data</td><td>"Produce: patterns, anomalies, unanswered questions, and 3 hypotheses to test."</td></tr>
+<tr><td><strong>Assess</strong></td><td>Estimate impact/risk/readiness</td><td>Risk reviews, readiness, health checks</td><td>"Assess using a 1–5 scale + definitions; include assumptions + confidence."</td></tr>
+<tr><td><strong>Diagnose</strong></td><td>Find root causes; isolate drivers</td><td>Incident analysis, performance drops, blockers</td><td>"Symptoms → likely causes → evidence → tests to confirm → recommended fix."</td></tr>
+<tr><td><strong>Review</strong></td><td>Summarize + critique; improve quality</td><td>Drafts, decks, emails, meeting notes</td><td>"Review for: accuracy, clarity, decision relevance; propose edits + 3 must-fix issues."</td></tr>
+<tr><td><strong>Interpret</strong></td><td>Explain meaning; translate into implications</td><td>Exec briefs, stakeholder readouts</td><td>"Interpret from provided evidence; label inference vs fact; tailor to [audience]."</td></tr>
+</table></div>
+</div>
+
+<p><strong>Takeaway:</strong> "Analyze" asks for work. <strong>Evaluate</strong> demands judgment. <strong>Diagnose</strong> hunts root causes. <strong>Audit</strong> enforces proof. <strong>Interpret</strong> creates meaning.</p>`
+  },
+  {
+    id: 8, num: "08", title: "\"Sounds Like a Human\" — Editing Prompt",
+    spice: "mild", category: "Technique",
+    desc: "Strip AI-sounding filler from any draft — banning 'Vocabulary of the Void' words and enforcing natural sentence rhythm.",
+    content: `<p>Paste this before any draft to strip out AI-sounding filler and make it read like a human wrote it:</p>
+
+${codeBlock("Human-voice editor prompt", `Act as a senior editor. Remove "Vocabulary of the Void" terms
+(do not use: delve, tapestry/tapestries, landscape, foster,
+unlock, realm/realms, nuance/nuanced) and similar filler clichés;
+replace with concrete, plain words.
+
+Maximize burstiness: vary sentence length (mix: 3–7 words,
+10–15 words, and an occasional 20–25 words), include occasional
+fragments and punchy lines, but keep logical flow and readability
+at grade 8–10.
+
+Avoid transition crutches (however, additionally, moreover,
+furthermore) unless indispensable. Preserve meaning and facts;
+don't invent details.
+
+Output:
+- Clean write, sound human.
+- Brief change log (key edits + any uncertainties).
+
+If terms are unavoidable, flag them.
+If information is missing, ask one clarifying question first.`)}
+`
+  },
+  {
+    id: 9, num: "09", title: "The Secret Power of Delimiters",
+    spice: "mild", category: "Technique",
+    desc: "Five high-impact delimiters that act like visual grammar for AI — helping the model parse intent faster, separate concerns, and weight instructions correctly.",
+    content: `<p>Better structure often beats more words. Delimiters shape how the model parses, prioritizes, and separates instructions.</p>
+
+<div class="sub-section">
+<h4>[ ] Square Brackets — Variables & Placeholders</h4>
+${codeBlock("Example", `Summarize the following for a [non-technical executive]: [paste content]`)}
+</div>
+
+<div class="sub-section">
+<h4>! Exclamation Mark — Priority Instructions</h4>
+${codeBlock("Example", `! Do not include assumptions.`)}
+</div>
+
+<div class="sub-section">
+<h4>| Pipe — Separating Options or Dimensions</h4>
+${codeBlock("Example", `Evaluate this idea across: cost | risk | scalability | timeline`)}
+</div>
+
+<div class="sub-section">
+<h4># Hash — Structure & Hierarchy</h4>
+${codeBlock("Example", `# Context
+# Task
+# Constraints
+# Output format`)}
+</div>
+
+<div class="sub-section">
+<h4>" " Quotation Marks — Exact Phrasing</h4>
+${codeBlock("Example", `Use the term "single source of truth" exactly as written.`)}
+</div>
+
+<p><strong>Why delimiters work:</strong> They act like visual grammar for AI — helping the model parse intent faster, separate concerns cleanly, and weight instructions appropriately.</p>`
+  },
+  {
+    id: 10, num: "10", title: "Meeting Notes — Detailed Summary Prompt",
+    spice: "medium", category: "Template",
+    desc: "A comprehensive, shareable meeting summary structure — briefing a teammate who wasn't present, with tables for questions, action items, and risks.",
+    content: `<p>Use this when you need a comprehensive, shareable meeting summary:</p>
+
+${codeBlock("Detailed meeting summary prompt", `Produce a detailed, actionable, and shareable summary of this
+meeting as if you are briefing a team member who was not present.
+Structure the summary as follows:
+
+Meeting Overview:
+- Brief context/purpose for the meeting in 2-3 sentences.
+- Date, time, and duration.
+
+Attendees & Roles:
+- Bullet list of all participants, specifying their roles and
+  organizations if applicable.
+
+Main Discussion Topics:
+- Outline each topic covered.
+- For each topic, include:
+  - Key points and outcome (decisions made, next steps).
+  - Explicitly note if no decision was reached and reasons why.
+  - Reference any delays or impediments raised, including
+    responsible parties and impact.
+
+Questions Raised:
+- Table: Question | Answer/Response | Name/Role of Responder
+
+Action Items:
+- Table: Action Item | Owner | Deadline | Status
+  (new, in progress, completed, deferred)
+- Call out any items that require urgent attention.
+
+Open Issues & Risks:
+- List any unresolved issues, risks, or blocked items, with
+  owner and mitigation steps if any.
+
+Follow-up & Next Steps:
+- Summarize agreed-upon next actions.
+- List required follow-up meetings or touchpoints, including
+  tentative dates if available.
+
+General Instructions:
+- Write in concise, professional language suitable for leadership.
+- Clearly differentiate facts from assumptions or pending items.
+- If information is missing or unclear, note as
+  "pending clarification."
+- Format tables and lists for readability.`)}`
+  },
+  {
+    id: 11, num: "11", title: "Learn Anything Faster — 80/20 Prompt",
+    spice: "mild", category: "Template",
+    desc: "Get the vital 20% that yields ~80% understanding of any topic — with core concepts, examples, pitfalls, and sources.",
+    content: `<p>Get the vital 20% that yields ~80% understanding of any topic:</p>
+
+${codeBlock("80/20 learning prompt", `Act as an expert [Subject] instructor.
+
+Topic: [specific topic].
+Learner level: [beginner/intermediate/advanced].
+
+In ≤400 words, explain the vital 20% that yields ~80%
+understanding. Provide 5–7 core concepts. For each:
+- 1–2 sentence plain-language summary
+- One concrete example
+- One common pitfall with a fix
+
+Use bullets, no fluff.
+
+If domain-specific or ambiguous, state assumptions and ask
+up to 2 clarifying questions before proceeding.
+Cite 2–3 credible sources or standard references.`)}`
+  },
+  {
+    id: 12, num: "12", title: "Clarifying Questions + Thinking Frameworks (Habanero 🔥)",
+    spice: "habanero", category: "Framework",
+    desc: "Combine 'Ask me X clarifying questions' with COACH or OCEAN frameworks for 5× better results — the Jalapeño Habanero upgrade.",
+    content: `<p>One of the simplest yet most powerful tricks: end your prompt with <strong>"Ask me X clarifying questions to optimize your results."</strong></p>
+
+<div class="sub-section">
+<h4>The Habanero Upgrade 🔥</h4>
+<p>Combine the clarifying-questions technique with a <strong>thinking framework</strong> for 5× better quality:</p>
+</div>
+
+<p><strong>Option A — COACH Framework:</strong></p>
+${codeBlock("COACH + Clarifying Questions", `Using the COACH framework
+(Context, Outcome, Audience, Constraints, Handoff),
+ask me 3 clarifying questions.`)}
+
+<p><strong>Option B — OCEAN Framework:</strong></p>
+${codeBlock("OCEAN + Clarifying Questions", `Using the OCEAN framework
+(Observable, Concrete, Evident, Assertive, Narrative),
+ask me 3 clarifying questions.`)}
+
+<p><strong>Why it works:</strong> Frameworks give the model structure, direction, and a shared mental model — producing sharper insights, cleaner reasoning, and far fewer revisions.</p>`
+  },
+  {
+    id: 13, num: "13", title: "\"Act As…\" — Persona-First Prompting",
+    spice: "hot", category: "Framework",
+    desc: "Don't just assign a role — have the LLM create a detailed expert persona first, then act as that persona. Front-loads context, tone, and decision boundaries.",
+    content: `<p>Don't just say "Act as a [role]." Have the model <strong>create</strong> the persona first, then act as it.</p>
+
+<div class="sub-section">
+<h4>Step 1 — Generate the Persona</h4>
+${codeBlock("Step 1: Generate persona", `Generate the most effective expert persona for this task:
+[insert task].
+
+The persona should be specific, detailed, and include relevant
+expertise, experience level, and domain knowledge.
+
+Provide the results in markdown format that is easy to understand
+and easy to adopt for completing the task.`)}
+<p><strong>Example output:</strong> "Benito Antonio — PMO Director (Public Sector)" with specializations in SAP HANA transformations, NIST-aligned controls, ATO timelines, and executive-ready tone.</p>
+</div>
+
+<div class="sub-section">
+<h4>Step 2 — Act as the Persona</h4>
+${codeBlock("Step 2: Use the persona", `You are Benito Antonio. Generate a comprehensive project plan
+for migrating to SAP HANA for a U.S. federal agency.
+
+Include: scope, milestones, dependencies, RACI,
+risks/mitigations, and a 90-day execution roadmap.
+
+Format: executive brief (bullets), then a 1-page timeline table.`)}
+</div>
+
+<p><strong>Why persona-first works:</strong> It front-loads domain context, tone, and decision boundaries so the model reasons like the right expert from the very first token — fewer rewrites, tighter outputs.</p>`
+  },
+  {
+    id: 14, num: "14", title: "Visual Edition — 10 Image Prompts",
+    spice: "medium", category: "Template",
+    desc: "Ten copy/paste prompts to visualize ideas — from system maps and mental model diagrams to persuasion infographics and risk radars.",
+    content: `<p><strong>Pro tip:</strong> Add a style line to any prompt below:<br>
+<em>"Style: clean infographic, minimal text, 3-color palette, icons > words, 16:9."</em></p>
+
+${codeBlock("1) System map infographic", `Create a system map infographic showing all components, inputs, outputs, and feedback loops of [Topic].
+Style: clean infographic, labeled arrows, minimal text, icons where possible.`)}
+
+${codeBlock("2) Teach a mental model", `Turn this mental model into a visual diagram optimized for teaching: [Model].
+Include: simple labels, 1 example, and a "common misunderstanding" callout.`)}
+
+${codeBlock("3) Memo → decision infographic", `Turn this strategic memo into a one-page decision infographic: [Paste memo].
+Include: decision, options, tradeoffs, recommendation, and next steps.`)}
+
+${codeBlock("4) Hidden risks", `Visualize the hidden risks people usually ignore in [Area].
+Show: risk, why it's missed, early signals, impact, mitigation.
+Format: risk radar or layered iceberg diagram.`)}
+
+${codeBlock("5) Complex topic (visuals first)", `Explain this complex topic using visuals first, text second: [Topic].
+Start with a single "big picture" diagram, then add small supporting visuals.`)}
+
+${codeBlock("6) Persuasion infographic", `Create an infographic designed to change someone's mind about [Belief].
+Use: 3 key visuals, 1 counterargument, 1 memorable analogy, 1 call-to-action.`)}
+
+${codeBlock("7) Confusion → clarity", `Turn this confusion into clarity visually: [Confusing idea].
+First show the "wrong mental model," then the corrected model side-by-side.`)}
+
+${codeBlock("8) One-glance summary", `Turn this insight into a one-glance visual summary: [Insights].
+Format: headline + 3 visual blocks + 1 takeaway. Keep text to a minimum.`)}
+
+${codeBlock("9) Obvious in hindsight", `Visualize this idea so clearly it becomes obvious in hindsight: [Paste idea].
+Use: one central metaphor + 3 supporting mini-visuals.`)}
+
+${codeBlock("10) Icons carry the meaning", `Create an infographic about [Topic] where icons carry most of the meaning.
+Use: minimal labels, consistent icon style, and a simple legend if needed.`)}`
+  },
+  {
+    id: 15, num: "15", title: "PowerPoint Presentation Builder (2-Step)",
+    spice: "hot", category: "Template",
+    desc: "A two-step workflow: first create a structured outline with narrative flow and data needs, then flesh out each slide with insight-driven content.",
+    content: `<div class="sub-section">
+<h4>Step 1 — Create the Outline</h4>
+${codeBlock("Step 1: Outline", `Create a structured outline for a PowerPoint presentation
+on [Topic], limited to [7] slides (excluding title and
+thank you).
+
+Act as a [Expert with 20 years of experience in field],
+preparing for [audience].
+
+The outline must include:
+1. Slide titles (headline = full-sentence takeaway, not labels).
+2. Narrative flow: Problem → Insight → Solution → Call to Action.
+3. Data needs: specify what data/visuals should be included
+   (chart types, placeholders if data is missing).
+4. Notes for industry/client context marked as
+   [Needs customization].
+5. Placeholders for:
+   - Executive summary
+   - Stakeholder impact
+   - Key assumptions
+   - Conclusion with next steps`)}
+</div>
+
+<div class="sub-section">
+<h4>Step 2 — Flesh Out the Slides</h4>
+${codeBlock("Step 2: Slide content", `Using the outline created, build PowerPoint slide content.
+
+Follow these rules:
+- Accuracy & Credibility:
+  - Use only verifiable facts.
+  - If uncertain, mark as [Needs verification] and suggest a source.
+- Slide Structure:
+  - Each slide = one insight-driven headline + 1–3 bullets or one visual.
+- Design Guidance:
+  - Clean, professional, consistent fonts/colors.
+  - Readable for executive audiences.
+- Context & Nuance:
+  - Tailor to [specific client/industry].
+  - If not provided, use top industry trends.
+- Final Slide:
+  - Action-oriented recommendations.
+  - Owners + timelines for next steps.
+
+Slide Structure Guide:
+1. Title slide (topic, presenter, client/logo if applicable)
+2. Executive summary (1–2 sentences on relevance)
+3–[X-2]. Main slides (headlines + supporting bullets/visuals)
+[X-1]. Stakeholder impact & key assumptions
+[X]. Conclusion: key takeaways + next steps
+[X+1]. Thank you / Questions`)}
+</div>`
+  },
+  {
+    id: 16, num: "16", title: "Quick Meeting Notes (Table Format)",
+    spice: "mild", category: "Template",
+    desc: "A compact meeting notes prompt — participant-by-participant in table format with columns for Topic, Comments, and Status.",
+    content: `<p>A compact alternative to the detailed meeting prompt:</p>
+
+${codeBlock("Quick meeting notes prompt", `Provide detailed meeting notes by participant, each item on
+bullet point, in table format with columns:
+Topic | Comments | Status.
+
+Identify risks or issues. Also identify action items.
+
+Additionally:
+- List all participants with name and last name.
+- Summarize the meeting including the essence of what was said,
+  with rationale and details, and add the name/last name of
+  the person bringing up each topic.
+- List any action items with the responsible person's name
+  and due date if provided.
+- List all changes requested to the items reviewed, including
+  the name of the person requesting the change.
+- Create meeting minutes including names of people bringing up
+  topics, action items, and decisions made.`)}`
+  }
+];
+
+function codeBlock(label, code) {
+  const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const id = 'cb_' + Math.random().toString(36).substr(2,9);
+  return `<div class="code-block"><div class="code-header"><span class="code-label">${label}</span><button class="copy-btn" onclick="copyCode(this, '${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button></div><pre id="${id}">${escaped}</pre></div>`;
+}
+
+// ========== CUSTOM PROMPTS (localStorage) ==========
+let customPrompts = JSON.parse(localStorage.getItem('jal_custom') || '[]');
+function saveCustomPrompts() { localStorage.setItem('jal_custom', JSON.stringify(customPrompts)); }
+function getAllPrompts() { return [...prompts, ...customPrompts]; }
+
+// ========== CATEGORIES (dynamic) ==========
+function getCategories() {
+  return ["All", ...new Set(getAllPrompts().map(p => p.category))];
+}
+
+// ========== STATE ==========
+let activeCategory = "All";
+let searchQuery = "";
+let showFavsOnly = false;
+let allExpanded = false;
+let favorites = JSON.parse(localStorage.getItem('jal_favs') || '[]');
+let editingId = null; // null = adding, number = editing
+
+// ========== RENDER ==========
+function renderNav() {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = getAllPrompts().map(p =>
+    `<a class="nav-item" data-id="${p.id}" onclick="scrollToCard(${p.id})">
+      <span class="nav-num">${p.num}</span>${p.title.length > 32 ? p.title.slice(0,32)+'…' : p.title}
+    </a>`
+  ).join('');
+}
+
+function renderCategories() {
+  const bar = document.getElementById('categoryBar');
+  bar.innerHTML = getCategories().map(c =>
+    `<span class="cat-pill${c === activeCategory ? ' active' : ''}" onclick="setCategory('${c}')">${c}</span>`
+  ).join('');
+  // Also update the datalist for the add modal
+  const dl = document.getElementById('catSuggestions');
+  if (dl) {
+    const cats = [...new Set(getAllPrompts().map(p => p.category))];
+    dl.innerHTML = cats.map(c => `<option value="${c}">`).join('');
+  }
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const q = searchQuery.toLowerCase();
+  const all = getAllPrompts();
+  let filtered = all.filter(p => {
+    if (showFavsOnly && !favorites.includes(p.id)) return false;
+    if (activeCategory !== "All" && p.category !== activeCategory) return false;
+    if (q) {
+      const haystack = (p.title + ' ' + p.desc + ' ' + p.category + ' ' + p.spice).toLowerCase();
+      return q.split(/\s+/).every(w => haystack.includes(w));
+    }
+    return true;
+  });
+
+  document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
+  document.getElementById('statsCount').textContent = `${filtered.length} of ${all.length} prompts`;
+
+  grid.innerHTML = filtered.map((p, i) => {
+    const isFav = favorites.includes(p.id);
+    const isCustom = p.isCustom === true;
+    const spiceLabel = {mild:'Mild',medium:'Medium',hot:'Hot',habanero:'Habanero'}[p.spice];
+    const peppers = {mild:'🌶️',medium:'🌶️🌶️',hot:'🌶️🌶️🌶️',habanero:'🌶️🌶️🌶️🌶️'}[p.spice];
+    const editDeleteBtns = isCustom ? `
+          <button class="card-btn edit-btn" onclick="event.stopPropagation();editPrompt(${p.id})" title="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="card-btn delete-btn" onclick="event.stopPropagation();confirmDeletePrompt(${p.id})" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>` : '';
+    return `<div class="prompt-card${allExpanded ? ' expanded' : ''}" id="card-${p.id}" style="animation-delay:${i*0.04}s">
+      <div class="card-header" onclick="toggleCard(${p.id})">
+        <span class="card-num">${p.num}</span>
+        <div class="card-info">
+          <div class="card-title">${highlightMatch(p.title, q)}</div>
+          <div class="card-meta">
+            <span class="spice-badge spice-${p.spice}">${peppers} ${spiceLabel}</span>
+            <span class="cat-tag">${p.category}</span>
+            ${isCustom ? '<span class="user-badge">Custom</span>' : ''}
+          </div>
+        </div>
+        <div class="card-actions">
+          ${editDeleteBtns}
+          <button class="card-btn${isFav ? ' fav-active' : ''}" onclick="event.stopPropagation();toggleFav(${p.id})" title="Favorite">
+            <svg viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+          <span class="expand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-content">
+          <p style="color:var(--text2);font-style:italic;margin-bottom:14px">${highlightMatch(p.desc, q)}</p>
+          ${p.content}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const words = query.split(/\s+/).filter(Boolean);
+  let result = text;
+  words.forEach(w => {
+    const re = new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+    result = result.replace(re, '<mark style="background:rgba(200,16,46,.15);color:inherit;padding:0 1px;border-radius:2px">$1</mark>');
+  });
+  return result;
+}
+
+// ========== INTERACTIONS ==========
+function toggleCard(id) {
+  const el = document.getElementById('card-' + id);
+  el.classList.toggle('expanded');
+}
+
+function scrollToCard(id) {
+  closeSidebar();
+  const el = document.getElementById('card-' + id);
+  if (el) {
+    if (!el.classList.contains('expanded')) el.classList.add('expanded');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function setCategory(cat) {
+  activeCategory = cat;
+  renderCategories();
+  renderCards();
+}
+
+function toggleFav(id) {
+  const idx = favorites.indexOf(id);
+  if (idx > -1) favorites.splice(idx, 1);
+  else favorites.push(id);
+  localStorage.setItem('jal_favs', JSON.stringify(favorites));
+  renderCards();
+}
+
+function toggleFavFilter() {
+  showFavsOnly = !showFavsOnly;
+  document.getElementById('favFilter').classList.toggle('active', showFavsOnly);
+  renderCards();
+}
+
+function expandAll() {
+  allExpanded = !allExpanded;
+  document.querySelectorAll('.prompt-card').forEach(c => {
+    c.classList.toggle('expanded', allExpanded);
+  });
+}
+
+function copyCode(btn, preId) {
+  const pre = document.getElementById(preId);
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+    showToast('Copied to clipboard!');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+    }, 2000);
+  });
+}
+
+// ========== THEME ==========
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+  document.getElementById('themeLabel').textContent = isDark ? 'Dark' : 'Light';
+  localStorage.setItem('jal_theme', isDark ? 'light' : 'dark');
+}
+
+// ========== SIDEBAR ==========
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('visible');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('visible');
+}
+
+// ========== BUILDER ==========
+function openBuilder() { document.getElementById('builderModal').classList.add('visible'); }
+function closeBuilder() { document.getElementById('builderModal').classList.remove('visible'); }
+
+function updateBuilder() {
+  const r = document.getElementById('bRole').value.trim();
+  const a = document.getElementById('bAction').value.trim();
+  const c = document.getElementById('bContext').value.trim();
+  const e = document.getElementById('bExpect').value.trim();
+  const addons = [...document.querySelectorAll('.addon-chk:checked')].map(el => el.value);
+
+  let out = '';
+  if (r) out += `# Role\n${r}\n\n`;
+  if (a) out += `# Action\n${a}\n\n`;
+  if (c) out += `# Context\n${c}\n\n`;
+  if (e) out += `# Expectation\n${e}`;
+  if (addons.length) out += `\n\n# Guardrails\n${addons.join('\n')}`;
+
+  document.getElementById('builderOutput').textContent = out || 'Your assembled prompt will appear here...';
+}
+
+function copyBuilderOutput() {
+  const text = document.getElementById('builderOutput').textContent;
+  if (text === 'Your assembled prompt will appear here...') return;
+  navigator.clipboard.writeText(text).then(() => showToast('Prompt copied to clipboard!'));
+}
+
+function clearBuilder() {
+  ['bRole','bAction','bContext','bExpect'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('.addon-chk').forEach(el => el.checked = false);
+  updateBuilder();
+}
+
+// ========== ADD / EDIT PROMPT ==========
+let promptBlockCount = 0;
+
+function openAddPrompt() {
+  editingId = null;
+  document.getElementById('addModalTitle').textContent = '🌶️ Add New Prompt';
+  document.getElementById('apSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Save Prompt';
+  clearAddForm();
+  addPromptBlock(); // start with one block
+  document.getElementById('addPromptModal').classList.add('visible');
+}
+
+function closeAddPrompt() {
+  document.getElementById('addPromptModal').classList.remove('visible');
+  editingId = null;
+}
+
+function clearAddForm() {
+  document.getElementById('apTitle').value = '';
+  document.getElementById('apCategory').value = '';
+  document.getElementById('apSpice').value = 'mild';
+  document.getElementById('apDesc').value = '';
+  document.getElementById('apNotes').value = '';
+  document.getElementById('promptBlocksArea').innerHTML = '';
+  promptBlockCount = 0;
+}
+
+function addPromptBlock(label, code) {
+  promptBlockCount++;
+  const area = document.getElementById('promptBlocksArea');
+  const div = document.createElement('div');
+  div.className = 'prompt-block-item';
+  div.setAttribute('data-block-id', promptBlockCount);
+  div.innerHTML = `
+    <button class="remove-block" onclick="this.parentElement.remove()" title="Remove block">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <label>Block Label</label>
+    <input type="text" class="block-label" placeholder='e.g. "Main prompt", "Step 1", "Example"' value="${label ? escAttr(label) : ''}">
+    <label style="margin-top:10px">Prompt Text</label>
+    <textarea class="block-code" placeholder="Paste or type your prompt template here...">${code ? escHTML(code) : ''}</textarea>
+  `;
+  area.appendChild(div);
+}
+
+function escAttr(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function escHTML(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildContentFromForm() {
+  const notes = document.getElementById('apNotes').value.trim();
+  const blocks = document.querySelectorAll('.prompt-block-item');
+  let html = '';
+
+  if (notes) {
+    // Convert simple line breaks to paragraphs
+    html += notes.split(/\n\n+/).map(p => `<p>${escHTML(p.trim()).replace(/\n/g,'<br>')}</p>`).join('');
+  }
+
+  blocks.forEach(block => {
+    const label = block.querySelector('.block-label').value.trim() || 'Prompt';
+    const code = block.querySelector('.block-code').value;
+    if (code.trim()) {
+      html += codeBlock(label, code);
+    }
+  });
+
+  return html;
+}
+
+function savePrompt() {
+  const title = document.getElementById('apTitle').value.trim();
+  const category = document.getElementById('apCategory').value.trim();
+  const spice = document.getElementById('apSpice').value;
+  const desc = document.getElementById('apDesc').value.trim();
+
+  // Validation
+  if (!title) { showToast('Please enter a title.'); document.getElementById('apTitle').focus(); return; }
+  if (!category) { showToast('Please enter a category.'); document.getElementById('apCategory').focus(); return; }
+  if (!desc) { showToast('Please enter a description.'); document.getElementById('apDesc').focus(); return; }
+
+  const content = buildContentFromForm();
+  const allP = getAllPrompts();
+
+  if (editingId !== null) {
+    // EDIT existing custom prompt
+    const idx = customPrompts.findIndex(p => p.id === editingId);
+    if (idx > -1) {
+      customPrompts[idx].title = title;
+      customPrompts[idx].category = category;
+      customPrompts[idx].spice = spice;
+      customPrompts[idx].desc = desc;
+      customPrompts[idx].content = content;
+      customPrompts[idx].notes = document.getElementById('apNotes').value.trim();
+      customPrompts[idx].blocks = getBlocksData();
+    }
+  } else {
+    // ADD new custom prompt
+    const maxId = allP.reduce((m, p) => Math.max(m, p.id), 0);
+    const newId = maxId + 1;
+    const num = String(newId).padStart(2, '0');
+    customPrompts.push({
+      id: newId,
+      num: num,
+      title: title,
+      spice: spice,
+      category: category,
+      desc: desc,
+      content: content,
+      isCustom: true,
+      notes: document.getElementById('apNotes').value.trim(),
+      blocks: getBlocksData()
+    });
+  }
+
+  saveCustomPrompts();
+  closeAddPrompt();
+  refreshAll();
+  showToast(editingId !== null ? 'Prompt updated!' : 'Prompt added to library!');
+
+  // Scroll to the new/edited prompt
+  const targetId = editingId !== null ? editingId : getAllPrompts().slice(-1)[0].id;
+  setTimeout(() => scrollToCard(targetId), 200);
+}
+
+function getBlocksData() {
+  const blocks = document.querySelectorAll('.prompt-block-item');
+  return [...blocks].map(b => ({
+    label: b.querySelector('.block-label').value.trim(),
+    code: b.querySelector('.block-code').value
+  })).filter(b => b.code.trim());
+}
+
+function editPrompt(id) {
+  const p = customPrompts.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('addModalTitle').textContent = '✏️ Edit Prompt';
+  document.getElementById('apSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Update Prompt';
+  document.getElementById('apTitle').value = p.title;
+  document.getElementById('apCategory').value = p.category;
+  document.getElementById('apSpice').value = p.spice;
+  document.getElementById('apDesc').value = p.desc;
+  document.getElementById('apNotes').value = p.notes || '';
+  document.getElementById('promptBlocksArea').innerHTML = '';
+  promptBlockCount = 0;
+
+  if (p.blocks && p.blocks.length) {
+    p.blocks.forEach(b => addPromptBlock(b.label, b.code));
+  } else {
+    addPromptBlock(); // empty block
+  }
+
+  document.getElementById('addPromptModal').classList.add('visible');
+}
+
+// ========== DELETE PROMPT ==========
+let pendingDeleteId = null;
+
+function confirmDeletePrompt(id) {
+  const p = customPrompts.find(x => x.id === id);
+  if (!p) return;
+  pendingDeleteId = id;
+  document.getElementById('confirmTitle').textContent = 'Delete prompt?';
+  document.getElementById('confirmMsg').textContent = `"${p.title}" will be permanently removed.`;
+  document.getElementById('confirmOverlay').classList.add('visible');
+  document.getElementById('confirmYes').onclick = executeDelete;
+}
+
+function executeDelete() {
+  if (pendingDeleteId === null) return;
+  customPrompts = customPrompts.filter(p => p.id !== pendingDeleteId);
+  favorites = favorites.filter(f => f !== pendingDeleteId);
+  saveCustomPrompts();
+  localStorage.setItem('jal_favs', JSON.stringify(favorites));
+  closeConfirm();
+  refreshAll();
+  showToast('Prompt deleted.');
+  pendingDeleteId = null;
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('visible');
+  pendingDeleteId = null;
+}
+
+// ========== IMPORT / EXPORT ==========
+function exportPrompts() {
+  if (customPrompts.length === 0) {
+    showToast('No custom prompts to export.');
+    return;
+  }
+  const data = JSON.stringify(customPrompts, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'jalapeno-custom-prompts.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${customPrompts.length} custom prompt(s).`);
+}
+
+function importPrompts(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('Invalid format');
+
+      // Reassign IDs to avoid collisions
+      const allP = getAllPrompts();
+      let maxId = allP.reduce((m, p) => Math.max(m, p.id), 0);
+      let count = 0;
+
+      imported.forEach(p => {
+        if (!p.title || !p.category) return; // skip invalid
+        maxId++;
+        customPrompts.push({
+          id: maxId,
+          num: String(maxId).padStart(2, '0'),
+          title: p.title || 'Untitled',
+          spice: p.spice || 'mild',
+          category: p.category || 'Custom',
+          desc: p.desc || '',
+          content: p.content || '',
+          isCustom: true,
+          notes: p.notes || '',
+          blocks: p.blocks || []
+        });
+        count++;
+      });
+
+      saveCustomPrompts();
+      refreshAll();
+      showToast(`Imported ${count} prompt(s)!`);
+    } catch (err) {
+      showToast('Import failed — invalid JSON file.');
+    }
+    event.target.value = ''; // reset input
+  };
+  reader.readAsText(file);
+}
+
+// ========== REFRESH ALL ==========
+function refreshAll() {
+  renderNav();
+  renderCategories();
+  renderCards();
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ========== SEARCH ==========
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchQuery = this.value;
+  renderCards();
+});
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+    if (e.key === 'Escape') { e.target.blur(); closeAddPrompt(); closeBuilder(); closeConfirm(); return; }
+    return;
+  }
+  if (e.key === '/') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+  if (e.key === 't' || e.key === 'T') toggleTheme();
+  if (e.key === 'b' || e.key === 'B') openBuilder();
+  if (e.key === 'n' || e.key === 'N') openAddPrompt();
+  if (e.key === 'Escape') { closeBuilder(); closeAddPrompt(); closeConfirm(); }
+});
+
+// ========== INIT ==========
+(function init() {
+  const saved = localStorage.getItem('jal_theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('themeIcon').textContent = '☀️';
+    document.getElementById('themeLabel').textContent = 'Light';
+  }
+  // Builder live update
+  ['bRole','bAction','bContext','bExpect'].forEach(id =>
+    document.getElementById(id).addEventListener('input', updateBuilder)
+  );
+  document.querySelectorAll('.addon-chk').forEach(el =>
+    el.addEventListener('change', updateBuilder)
+  );
+  refreshAll();
+})();
+</script>
+</body>
+</html>
