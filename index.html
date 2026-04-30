@@ -78,10 +78,30 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 .stats-badge{font-size:.72rem;color:var(--text3);font-family:var(--font-mono);white-space:nowrap}
 
 /* CONTENT AREA */
-.content{padding:28px 32px 80px;max-width:960px;margin:0 auto}
+.content{padding:28px 32px 80px;max-width:1320px;margin:0 auto}
 .content-header{margin-bottom:28px}
-.content-header h2{font-family:var(--font-display);font-size:1.8rem;font-weight:800;letter-spacing:-.02em;color:var(--text)}
+.content-header h2{font-family:var(--font-display);font-size:1.8rem;font-weight:800;letter-spacing:-.02em;color:var(--text);display:flex;align-items:center;gap:8px}
+.content-header h2 span:first-child{font-size:1.6rem}
+.content-header h2 .jal-red{color:var(--accent)}
 .content-header p{color:var(--text2);margin-top:6px;font-size:.92rem;max-width:640px}
+
+/* TIP OF THE WEEK */
+.tip-section{margin-bottom:28px}
+.tip-card{background:linear-gradient(135deg,rgba(200,16,46,.06) 0%,rgba(134,163,15,.06) 100%);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--radius);padding:20px 24px;position:relative;overflow:hidden}
+[data-theme="dark"] .tip-card{background:linear-gradient(135deg,rgba(200,16,46,.08) 0%,rgba(134,163,15,.06) 100%)}
+.tip-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:var(--accent);opacity:.04;border-radius:50%}
+.tip-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tip-header h3{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--accent)}
+.tip-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--accent);color:#fff;padding:2px 8px;border-radius:8px}
+.tip-body{font-size:.88rem;color:var(--text2);line-height:1.6}
+.tip-body strong{color:var(--text)}
+.tip-prompt{margin-top:10px}
+.tip-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.tip-nav{display:flex;align-items:center;gap:6px}
+.tip-nav-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;cursor:pointer;color:var(--text3);font-size:.72rem;transition:all var(--transition);display:flex;align-items:center;gap:3px}
+.tip-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tip-nav-btn svg{width:12px;height:12px}
+.tip-counter{font-family:var(--font-mono);font-size:.68rem;color:var(--text3)}
 
 /* CATEGORY FILTERS */
 .category-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
@@ -90,15 +110,24 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 .cat-pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* PROMPT CARDS */
-.cards-grid{display:flex;flex-direction:column;gap:16px}
-.prompt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all var(--transition);animation:fadeUp .4s ease both}
-.prompt-card:hover{box-shadow:var(--shadow);border-color:var(--border2)}
+.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1200px){.cards-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.cards-grid{grid-template-columns:1fr}}
+.prompt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .25s cubic-bezier(.4,0,.2,1);animation:fadeUp .4s ease both;display:flex;flex-direction:column}
+.prompt-card:hover{box-shadow:var(--shadow);border-color:var(--border2);transform:translateY(-2px)}
+.prompt-card.expanded{grid-column:1/-1;transform:none}
+.prompt-card.expanded:hover{transform:none}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.card-header{padding:18px 22px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;user-select:none}
+.card-header{padding:16px 18px 12px;cursor:pointer;display:flex;flex-direction:column;gap:8px;user-select:none}
+.prompt-card.expanded .card-header{flex-direction:row;align-items:flex-start;gap:14px;padding:18px 22px 14px}
 .card-header:hover .card-title{color:var(--accent)}
-.card-num{font-family:var(--font-mono);font-size:.7rem;color:var(--text3);min-width:22px;padding-top:4px}
+.card-num{font-family:var(--font-mono);font-size:.7rem;color:var(--text3);min-width:22px}
+.prompt-card:not(.expanded) .card-num{position:absolute;top:16px;right:16px}
+.prompt-card:not(.expanded) .card-header{position:relative}
 .card-info{flex:1}
-.card-title{font-family:var(--font-display);font-size:1.12rem;font-weight:700;transition:color var(--transition);letter-spacing:-.01em}
+.card-title{font-family:var(--font-display);font-size:.95rem;font-weight:700;transition:color var(--transition);letter-spacing:-.01em;line-height:1.3}
+.prompt-card.expanded .card-title{font-size:1.12rem}
 .card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:7px}
 .spice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.02em;text-transform:uppercase}
 .spice-mild{background:#f0f5e0;color:var(--spice-mild)}
@@ -111,6 +140,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 [data-theme="dark"] .spice-habanero{background:#200808;color:#d44040}
 .cat-tag{font-size:.68rem;color:var(--tag-text);background:var(--tag-bg);padding:2px 8px;border-radius:10px;font-weight:500}
 .card-actions{display:flex;align-items:center;gap:4px;padding-top:2px}
+.prompt-card:not(.expanded) .card-actions{display:none}
 .card-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:var(--radius-sm);color:var(--text3);transition:all var(--transition);display:flex;align-items:center}
 .card-btn:hover{background:var(--bg2);color:var(--accent)}
 .card-btn.fav-active{color:var(--accent3)}
@@ -212,6 +242,20 @@ pre{background:var(--code-bg);padding:16px;overflow-x:auto;font-family:var(--fon
 .content::-webkit-scrollbar{width:6px}
 .content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 
+/* ADMIN PASSWORD GATE */
+.pw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:210;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.pw-overlay.visible{display:flex}
+.pw-box{background:var(--surface);border-radius:var(--radius);padding:28px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);animation:modalIn .25s ease;text-align:center}
+.pw-box h4{font-family:var(--font-display);font-size:1.1rem;margin-bottom:6px;color:var(--accent)}
+.pw-box p{font-size:.82rem;color:var(--text2);margin-bottom:16px}
+.pw-box input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:.9rem;text-align:center;outline:none;transition:border var(--transition)}
+.pw-box input:focus{border-color:var(--accent)}
+.pw-box input.pw-error{border-color:var(--accent);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.pw-box .pw-hint{font-size:.72rem;color:var(--accent);margin-top:6px;min-height:16px}
+.pw-actions{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.admin-badge{font-size:.6rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:6px;vertical-align:middle}
+
 /* FAB - Add Prompt */
 .fab{position:fixed;bottom:28px;right:28px;z-index:90;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;transition:all var(--transition);font-size:1.5rem}
 .fab:hover{transform:scale(1.08);filter:brightness(1.12)}
@@ -272,7 +316,7 @@ pre{background:var(--code-bg);padding:16px;overflow-x:auto;font-family:var(--fon
   <div class="sidebar-footer">
     <div class="footer-row">
       <button class="theme-toggle" onclick="openAddPrompt()" title="Add new prompt (N)" style="background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600">
-        ＋ New Prompt
+        ＋ New Prompt <span class="admin-badge">🔒 Admin</span>
       </button>
       <span class="kbd-hint">Press N</span>
     </div>
@@ -333,9 +377,14 @@ pre{background:var(--code-bg);padding:16px;overflow-x:auto;font-family:var(--fon
   <!-- CONTENT -->
   <div class="content">
     <div class="content-header">
-      <h2>Prompt Library</h2>
+      <h2>
+        <span>🌶️</span> <span class="jal-red">Jalapeño</span> Prompt Library
+      </h2>
       <p>Enterprise-ready prompt frameworks, power words, and techniques to unlock better thinking from any LLM.</p>
     </div>
+
+    <!-- TIP OF THE WEEK -->
+    <div class="tip-section" id="tipSection"></div>
 
     <!-- CATEGORY PILLS -->
     <div class="category-bar" id="categoryBar"></div>
@@ -498,6 +547,23 @@ pre{background:var(--code-bg);padding:16px;overflow-x:auto;font-family:var(--fon
     <div class="confirm-actions">
       <button class="btn-primary" id="confirmYes" style="background:var(--accent)">Delete</button>
       <button class="btn-secondary" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PASSWORD GATE -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-box">
+    <h4>🔒 Admin Access</h4>
+    <p>Adding, editing, and deleting prompts requires an administrator password.</p>
+    <input type="password" id="pwInput" placeholder="Enter admin password" autocomplete="off">
+    <div class="pw-hint" id="pwHint"></div>
+    <div class="pw-actions">
+      <button class="btn-primary" onclick="submitPassword()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Unlock
+      </button>
+      <button class="btn-secondary" onclick="closePwGate()">Cancel</button>
     </div>
   </div>
 </div>
@@ -1044,6 +1110,153 @@ function codeBlock(label, code) {
   return `<div class="code-block"><div class="code-header"><span class="code-label">${label}</span><button class="copy-btn" onclick="copyCode(this, '${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button></div><pre id="${id}">${escaped}</pre></div>`;
 }
 
+// ========== ADMIN PASSWORD SYSTEM ==========
+const ADMIN_HASH = 'ee98a849e792913a40aa23444e186dea33c531c2e4ef52c1e6ed6feb522c8df3'; // SHA-256 of admin password
+let isAdminUnlocked = false;
+let pendingAdminAction = null;
+
+async function hashPassword(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function requireAdmin(action) {
+  if (isAdminUnlocked) { action(); return; }
+  pendingAdminAction = action;
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwHint').textContent = '';
+  document.getElementById('pwInput').classList.remove('pw-error');
+  document.getElementById('pwOverlay').classList.add('visible');
+  setTimeout(() => document.getElementById('pwInput').focus(), 100);
+}
+
+async function submitPassword() {
+  const pw = document.getElementById('pwInput').value;
+  if (!pw) { document.getElementById('pwHint').textContent = 'Please enter a password.'; return; }
+  const hash = await hashPassword(pw);
+  if (hash === ADMIN_HASH) {
+    isAdminUnlocked = true;
+    closePwGate();
+    showToast('🔓 Admin access granted.');
+    if (pendingAdminAction) { pendingAdminAction(); pendingAdminAction = null; }
+  } else {
+    document.getElementById('pwInput').classList.add('pw-error');
+    document.getElementById('pwHint').textContent = 'Incorrect password. Try again.';
+    setTimeout(() => document.getElementById('pwInput').classList.remove('pw-error'), 500);
+  }
+}
+
+function closePwGate() {
+  document.getElementById('pwOverlay').classList.remove('visible');
+  pendingAdminAction = null;
+}
+
+// Enter key on password field
+document.getElementById('pwInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') submitPassword();
+  if (e.key === 'Escape') closePwGate();
+});
+
+// ========== TIP OF THE WEEK DATA ==========
+const tips = [
+  {
+    title: "Start every prompt with a Role",
+    body: "Even a simple <strong>\"Act as a senior data analyst…\"</strong> shifts the model's reasoning, vocabulary, and confidence level. Roles aren't decoration — they're steering wheels.",
+    prompt: "Act as a [role with 15+ years of experience]. Your task: [describe task]. Prioritize [key constraint].",
+    source: "Prompt #1 — RACE Framework"
+  },
+  {
+    title: "Use \"Dichotomy\" to unlock contrast",
+    body: "When your summaries feel flat, add the word <strong>dichotomy</strong>. It forces the model to find tensions, opposing views, and tradeoffs — turning a recap into analysis.",
+    prompt: "Summarize this [document], highlighting the key dichotomy between opposing viewpoints and tradeoffs discussed.",
+    source: "Prompt #2 — Power Word"
+  },
+  {
+    title: "Stop hallucinations with one sentence",
+    body: "Adding <strong>\"If you don't know, say so\"</strong> is the single most effective anti-hallucination guardrail. It removes the pressure to fabricate answers.",
+    prompt: "If you do not know the answer, state \"I don't know\" or \"This information is not available in the provided context.\"",
+    source: "Prompt #6 — Anti-Hallucination"
+  },
+  {
+    title: "Replace \"Analyze\" with a precision verb",
+    body: "\"Analyze\" is a blank check. <strong>Evaluate</strong> demands judgment. <strong>Diagnose</strong> hunts root causes. <strong>Audit</strong> enforces proof. Pick the verb that matches the thinking you need.",
+    prompt: "Evaluate this proposal against these 5 criteria: [list]. Score each 1–5 with evidence.",
+    source: "Prompt #7 — Active-Verb Matrix"
+  },
+  {
+    title: "Ask the AI to ask YOU questions first",
+    body: "End your prompt with <strong>\"Ask me 3 clarifying questions before proceeding.\"</strong> You'll get dramatically better output because the model understands your real intent.",
+    prompt: "Using the COACH framework (Context, Outcome, Audience, Constraints, Handoff), ask me 3 clarifying questions.",
+    source: "Prompt #12 — Habanero Upgrade"
+  },
+  {
+    title: "Red team everything important",
+    body: "After generating any plan, proposal, or recommendation — run it through a <strong>red team prompt</strong>. 12 reasons why it will fail, ranked by severity, with fast tests to expose each one.",
+    prompt: "Act as a harsh-but-fair reviewer. Identify 12 distinct reasons this [artifact] will fail. For each: claim, evidence, severity (H/M/L), and a fast test.",
+    source: "Prompt #4 — Red Team"
+  },
+  {
+    title: "Delimiters beat longer instructions",
+    body: "Using <strong># for sections</strong>, <strong>[ ] for variables</strong>, and <strong>| for options</strong> helps the model parse your intent faster and more accurately than adding extra words.",
+    prompt: "# Role\\nAs a [role]\\n\\n# Task\\nEvaluate across: cost | risk | scalability | timeline",
+    source: "Prompt #9 — Delimiters"
+  },
+  {
+    title: "\"Synthesize\" beats \"Summarize\"",
+    body: "<strong>Summarize</strong> extracts key sentences. <strong>Synthesize</strong> connects ideas across sources and time. When you need patterns and decisions — not a recap — use synthesize with a numbered structure.",
+    prompt: "Synthesize into: 1) Core decisions 2) Conflicting viewpoints 3) Action items 4) Open questions 5) Emerging patterns.",
+    source: "Prompt #3 — Synthesizing"
+  }
+];
+let currentTipIdx = 0;
+
+function renderTip() {
+  // Rotate based on ISO week number so it changes weekly
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const weekNum = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+  currentTipIdx = weekNum % tips.length;
+
+  const tip = tips[currentTipIdx];
+  const escaped = tip.prompt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const tipId = 'tip_cb_' + Math.random().toString(36).substr(2,6);
+  document.getElementById('tipSection').innerHTML = `
+    <div class="tip-card">
+      <div class="tip-header">
+        <span class="tip-label">Tip of the Week</span>
+        <h3>${tip.title}</h3>
+      </div>
+      <div class="tip-body">
+        ${tip.body}
+        <div class="tip-prompt">
+          <div class="code-block"><div class="code-header"><span class="code-label">${tip.source}</span><button class="copy-btn" onclick="copyCode(this, '${tipId}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button></div><pre id="${tipId}">${escaped}</pre></div>
+        </div>
+      </div>
+      <div class="tip-footer">
+        <span class="tip-counter">${currentTipIdx + 1} of ${tips.length}</span>
+        <div class="tip-nav">
+          <button class="tip-nav-btn" onclick="prevTip()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Prev</button>
+          <button class="tip-nav-btn" onclick="nextTip()">Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function nextTip() { currentTipIdx = (currentTipIdx + 1) % tips.length; renderTipAt(); }
+function prevTip() { currentTipIdx = (currentTipIdx - 1 + tips.length) % tips.length; renderTipAt(); }
+function renderTipAt() {
+  const tip = tips[currentTipIdx];
+  const escaped = tip.prompt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const tipId = 'tip_cb_' + Math.random().toString(36).substr(2,6);
+  document.getElementById('tipSection').querySelector('.tip-header h3').textContent = tip.title;
+  document.getElementById('tipSection').querySelector('.tip-body').innerHTML = `
+    ${tip.body}
+    <div class="tip-prompt">
+      <div class="code-block"><div class="code-header"><span class="code-label">${tip.source}</span><button class="copy-btn" onclick="copyCode(this, '${tipId}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button></div><pre id="${tipId}">${escaped}</pre></div>
+    </div>`;
+  document.getElementById('tipSection').querySelector('.tip-counter').textContent = `${currentTipIdx + 1} of ${tips.length}`;
+}
+
 // ========== CUSTOM PROMPTS (localStorage) ==========
 let customPrompts = JSON.parse(localStorage.getItem('jal_custom') || '[]');
 function saveCustomPrompts() { localStorage.setItem('jal_custom', JSON.stringify(customPrompts)); }
@@ -1268,12 +1481,14 @@ function clearBuilder() {
 let promptBlockCount = 0;
 
 function openAddPrompt() {
-  editingId = null;
-  document.getElementById('addModalTitle').textContent = '🌶️ Add New Prompt';
-  document.getElementById('apSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Save Prompt';
-  clearAddForm();
-  addPromptBlock(); // start with one block
-  document.getElementById('addPromptModal').classList.add('visible');
+  requireAdmin(function() {
+    editingId = null;
+    document.getElementById('addModalTitle').textContent = '🌶️ Add New Prompt';
+    document.getElementById('apSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Save Prompt';
+    clearAddForm();
+    addPromptBlock(); // start with one block
+    document.getElementById('addPromptModal').classList.add('visible');
+  });
 }
 
 function closeAddPrompt() {
@@ -1397,39 +1612,43 @@ function getBlocksData() {
 }
 
 function editPrompt(id) {
-  const p = customPrompts.find(x => x.id === id);
-  if (!p) return;
-  editingId = id;
-  document.getElementById('addModalTitle').textContent = '✏️ Edit Prompt';
-  document.getElementById('apSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Update Prompt';
-  document.getElementById('apTitle').value = p.title;
-  document.getElementById('apCategory').value = p.category;
-  document.getElementById('apSpice').value = p.spice;
-  document.getElementById('apDesc').value = p.desc;
-  document.getElementById('apNotes').value = p.notes || '';
-  document.getElementById('promptBlocksArea').innerHTML = '';
-  promptBlockCount = 0;
+  requireAdmin(function() {
+    const p = customPrompts.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('addModalTitle').textContent = '✏️ Edit Prompt';
+    document.getElementById('apSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Update Prompt';
+    document.getElementById('apTitle').value = p.title;
+    document.getElementById('apCategory').value = p.category;
+    document.getElementById('apSpice').value = p.spice;
+    document.getElementById('apDesc').value = p.desc;
+    document.getElementById('apNotes').value = p.notes || '';
+    document.getElementById('promptBlocksArea').innerHTML = '';
+    promptBlockCount = 0;
 
-  if (p.blocks && p.blocks.length) {
-    p.blocks.forEach(b => addPromptBlock(b.label, b.code));
-  } else {
-    addPromptBlock(); // empty block
-  }
+    if (p.blocks && p.blocks.length) {
+      p.blocks.forEach(b => addPromptBlock(b.label, b.code));
+    } else {
+      addPromptBlock();
+    }
 
-  document.getElementById('addPromptModal').classList.add('visible');
+    document.getElementById('addPromptModal').classList.add('visible');
+  });
 }
 
 // ========== DELETE PROMPT ==========
 let pendingDeleteId = null;
 
 function confirmDeletePrompt(id) {
-  const p = customPrompts.find(x => x.id === id);
-  if (!p) return;
-  pendingDeleteId = id;
-  document.getElementById('confirmTitle').textContent = 'Delete prompt?';
-  document.getElementById('confirmMsg').textContent = `"${p.title}" will be permanently removed.`;
-  document.getElementById('confirmOverlay').classList.add('visible');
-  document.getElementById('confirmYes').onclick = executeDelete;
+  requireAdmin(function() {
+    const p = customPrompts.find(x => x.id === id);
+    if (!p) return;
+    pendingDeleteId = id;
+    document.getElementById('confirmTitle').textContent = 'Delete prompt?';
+    document.getElementById('confirmMsg').textContent = `"${p.title}" will be permanently removed.`;
+    document.getElementById('confirmOverlay').classList.add('visible');
+    document.getElementById('confirmYes').onclick = executeDelete;
+  });
 }
 
 function executeDelete() {
@@ -1540,7 +1759,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 't' || e.key === 'T') toggleTheme();
   if (e.key === 'b' || e.key === 'B') openBuilder();
   if (e.key === 'n' || e.key === 'N') openAddPrompt();
-  if (e.key === 'Escape') { closeBuilder(); closeAddPrompt(); closeConfirm(); }
+  if (e.key === 'Escape') { closeBuilder(); closeAddPrompt(); closeConfirm(); closePwGate(); }
 });
 
 // ========== INIT ==========
@@ -1558,6 +1777,7 @@ document.addEventListener('keydown', function(e) {
   document.querySelectorAll('.addon-chk').forEach(el =>
     el.addEventListener('change', updateBuilder)
   );
+  renderTip();
   refreshAll();
 })();
 </script>
